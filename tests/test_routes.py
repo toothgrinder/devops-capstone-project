@@ -19,12 +19,13 @@ DATABASE_URI = os.getenv(
 )
 
 BASE_URL = "/accounts"
-
 HTTPS_ENVIRON = {'wsgi.url_scheme': 'https'}
 
 ######################################################################
 #  T E S T   C A S E S
 ######################################################################
+
+
 class TestAccountService(TestCase):
     """Account Service Tests"""
 
@@ -134,20 +135,18 @@ class TestAccountService(TestCase):
             content_type="application/json"
         )
         data = response.get_json()
-        #logger.info(data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(data, [])
 
         for _ in range(5):
             account = AccountFactory()
             account.create()
-        accounts = Account.all()
         resp = self.client.get(
             BASE_URL, content_type="application/json"
         )
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
-        self.assertEqual(len(data),5)
+        self.assertEqual(len(data), 5)
 
     def test_get_account(self):
         """It should Read a single Account"""
@@ -158,7 +157,7 @@ class TestAccountService(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(data["name"], account.name)
-    
+
     def test_get_account_not_found(self):
         """It should not Get an Account thats not found"""
         response = self.client.get(f"{BASE_URL}/0")
@@ -168,19 +167,19 @@ class TestAccountService(TestCase):
         """It should Update an Account"""
         test_account = AccountFactory()
         response = self.client.post(BASE_URL, json=test_account.serialize())
-        self.assertEqual(response.status_code,status.HTTP_201_CREATED)
-
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         new_account = response.get_json()
         new_account["name"] = "JOHN"
         response = self.client.put(f"{BASE_URL}/{new_account['id']}", json=new_account)
-        self.assertEqual(response.status_code,status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         updated_account = response.get_json()
-        self.assertEqual(new_account["name"],updated_account["name"])
+        self.assertEqual(new_account["name"], updated_account["name"])
+
     def test_update_not_found_account(self):
         """It should return a not found Account on updating"""
         account = []
-        response = self.client.put(f"{BASE_URL}/0",json=account)
-        self.assertEqual(response.status_code,status.HTTP_404_NOT_FOUND)
+        response = self.client.put(f"{BASE_URL}/0", json=account)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete_account(self):
         """It should Delete an Account"""
@@ -214,6 +213,7 @@ class TestAccountService(TestCase):
         }
         for key, value in headers.items():
             self.assertEqual(response.headers.get(key), value)
+
     def test_cors_security(self):
         """It should return a CORS header"""
         response = self.client.get('/', environ_overrides=HTTPS_ENVIRON)
